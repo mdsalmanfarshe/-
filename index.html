@@ -1,0 +1,418 @@
+
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dakhil 2027 | Study Command Center</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f1f5f9;color:#172b43;font-family:Arial,"Noto Sans Bengali",sans-serif}
+header{background:#102d4a;color:white;padding:22px 16px}
+header h1{font-size:21px;margin:0 0 7px}
+header p{color:#c5d9e9;font-size:12px;margin:0}
+.container{max-width:950px;margin:auto;padding:14px}
+.card{background:white;padding:16px;border-radius:14px;margin-bottom:13px;box-shadow:0 3px 12px #102d4a0c}
+h2{font-size:17px;margin:0 0 14px}
+h3{font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.stat{background:#eaf2fa;border-radius:10px;padding:13px}
+.stat small{color:#53677b}
+.stat strong{display:block;font-size:23px;margin-top:6px;color:#153b60}
+input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;padding:11px;border:1px solid #d5deea;border-radius:8px;margin:5px 0 12px;background:white;color:#172b43}
+textarea{min-height:70px;resize:vertical}
+label{font-size:13px;font-weight:bold}
+button{border:0;border-radius:8px;padding:11px 15px;background:#174b76;color:white;cursor:pointer;font-weight:bold}
+button.secondary{background:#e5edf5;color:#183b5b}
+button.danger{background:#b42318}
+button.green{background:#16804b}
+button:active{opacity:.8}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1}
+.progress{height:10px;background:#e2e8f0;border-radius:20px;overflow:hidden;margin:12px 0}
+.bar{height:100%;width:0;background:#16804b;transition:.3s}
+.subject{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:center;border-bottom:1px solid #edf0f4;padding:6px 0}
+.subject input{margin:0}
+.subject span{font-size:12px;color:#53677b}
+.log{padding:11px 0;border-bottom:1px solid #e8edf2;font-size:13px}
+.log strong{display:block;margin-bottom:4px}
+.tag{display:inline-block;background:#eaf2fa;padding:4px 8px;border-radius:20px;font-size:11px}
+.nav{display:flex;gap:7px;overflow:auto;padding:10px 0}
+.nav button{white-space:nowrap;font-size:12px}
+.section{display:none}
+.section.active{display:block}
+.quote{background:#102d4a;color:white;border-radius:12px;padding:18px;line-height:1.8}
+.quote b{color:#f5cc79}
+.muted{color:#65778b;font-size:12px;line-height:1.7}
+table{width:100%;border-collapse:collapse;font-size:12px}
+td,th{padding:9px 5px;border-bottom:1px solid #e8edf2;text-align:left}
+th{background:#f1f5f9}
+footer{text-align:center;padding:22px;color:#65778b;font-size:12px}
+@media(min-width:650px){.stats{grid-template-columns:repeat(4,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🎓 STUDY COMMAND CENTER</h1>
+  <p>DAKHIL EXAMINATION 2027 | PERSONAL STUDY MANAGEMENT</p>
+</header>
+
+<main class="container">
+<div class="card">
+  <label>আজকের তারিখ</label>
+  <input type="date" id="date">
+  <div class="row">
+    <div>
+      <label>দৈনিক পড়ার লক্ষ্য (ঘণ্টা)</label>
+      <input type="number" id="goal" min="1" max="12" value="6">
+    </div>
+    <div>
+      <label>আজকের অবস্থা</label>
+      <select id="mood">
+        <option>ভালো</option>
+        <option>মোটামুটি</option>
+        <option>মনোযোগ কম</option>
+        <option>ক্লান্ত</option>
+      </select>
+    </div>
+  </div>
+  <button class="green" onclick="saveSettings()">সেটিংস সংরক্ষণ</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><small>আজ পড়েছ</small><strong id="studyTotal">০ ঘণ্টা</strong></div>
+  <div class="stat"><small>অন্য কাজে সময়</small><strong id="otherTotal">০ ঘণ্টা</strong></div>
+  <div class="stat"><small>আজকের লক্ষ্য</small><strong id="goalShow">৬ ঘণ্টা</strong></div>
+  <div class="stat"><small>লক্ষ্য পূরণ</small><strong id="percent">০%</strong></div>
+</div>
+
+<div class="card">
+  <h2>📊 আজকের অগ্রগতি</h2>
+  <div class="progress"><div class="bar" id="progress"></div></div>
+  <p class="muted" id="progressText">আজকের পড়াশোনা শুরু করো।</p>
+</div>
+
+<div class="nav">
+<button onclick="tab('routine')">১৪ বিষয়</button>
+<button onclick="tab('study')">পড়ার হিসাব</button>
+<button onclick="tab('other')">অন্য কাজের হিসাব</button>
+<button onclick="tab('report')">রিপোর্ট</button>
+<button onclick="tab('motivation')">অনুপ্রেরণা</button>
+</div>
+
+<!-- SUBJECTS -->
+<section id="routine" class="section active">
+<div class="card">
+<h2>📚 তোমার ১৪টি বিষয়</h2>
+<p class="muted">তোমার মাদরাসার সিলেবাস অনুযায়ী প্রতিটি বিষয়ের নাম পরিবর্তন করতে পারবে।</p>
+<div id="subjects"></div>
+<button onclick="saveSubjects()">বিষয়ের নাম সংরক্ষণ</button>
+</div>
+<div class="card">
+<h2>🗓️ দৈনিক পড়ার সময়সূচি</h2>
+<p class="muted">এটি একটি প্রস্তাবিত সময়সূচি। নিজের ক্লাস, নামাজ ও বিশ্রামের সঙ্গে মিলিয়ে বদলে নেবে।</p>
+<table>
+<tr><th>সময়</th><th>কাজ</th></tr>
+<tr><td>৬:০০–৭:০০</td><td>গণিত / কঠিন বিষয়</td></tr>
+<tr><td>৭:১৫–৮:১৫</td><td>ইংরেজি</td></tr>
+<tr><td>৮:৩০–৯:০০</td><td>আরবি</td></tr>
+<tr><td>বিকেল ৩:০০–৪:০০</td><td>কুরআন / হাদিস</td></tr>
+<tr><td>৪:১৫–৫:০০</td><td>অন্যান্য বিষয়</td></tr>
+<tr><td>সন্ধ্যা ৬:৩০–৭:৩০</td><td>আরবি / দুর্বল বিষয়</td></tr>
+<tr><td>রাত ৮:০০–৯:০০</td><td>রিভিশন ও অনুশীলন</td></tr>
+</table>
+<p class="muted">প্রতিটি সেশনের মাঝে ছোট বিরতি রাখবে। রাতের ঘুম ৮–১০ ঘণ্টা নিশ্চিত করবে।</p>
+</div>
+</section>
+
+<!-- STUDY LOG -->
+<section id="study" class="section">
+<div class="card">
+<h2>✍️ পড়াশোনার হিসাব যোগ করো</h2>
+<label>কোন বিষয় পড়েছ?</label>
+<select id="studySubject"></select>
+<label>পড়ার তারিখ</label>
+<input type="date" id="studyDate">
+<div class="row">
+<div><label>শুরু</label><input type="time" id="studyStart"></div>
+<div><label>শেষ</label><input type="time" id="studyEnd"></div>
+</div>
+<label>কী পড়েছ?</label>
+<textarea id="studyDetail" placeholder="যেমন: ইংরেজি Grammar, Tense, ১০টি অঙ্ক..."></textarea>
+<label>কতটুকু বুঝেছ?</label>
+<select id="understood">
+<option>ভালোভাবে বুঝেছি</option>
+<option>কিছুটা বুঝেছি</option>
+<option>আবার পড়তে হবে</option>
+</select>
+<button class="green" onclick="addStudy()">পড়ার হিসাব সংরক্ষণ</button>
+</div>
+<div class="card">
+<h2>📖 আজকের পড়ার তালিকা</h2>
+<div id="studyLogs"></div>
+</div>
+</section>
+
+<!-- OTHER ACTIVITIES -->
+<section id="other" class="section">
+<div class="card">
+<h2>⏰ পড়ার সময় কী করেছ?</h2>
+<p class="muted">পড়ার জন্য নির্ধারিত সময় চলে গেলে সেটি লুকাবে না। সত্যি যা করেছ, লিখে রাখবে। এটি নিজেকে শাস্তি দেওয়ার জন্য নয়, সময় ব্যবস্থাপনা শেখার জন্য।</p>
+<label>তারিখ</label>
+<input type="date" id="otherDate">
+<div class="row">
+<div><label>শুরু সময়</label><input type="time" id="otherStart"></div>
+<div><label>শেষ সময়</label><input type="time" id="otherEnd"></div>
+</div>
+<label>কী করেছ?</label>
+<select id="activity">
+<option>মোবাইল / সোশ্যাল মিডিয়া</option>
+<option>কোডিং / ওয়েবসাইট</option>
+<option>ঘুম / বিশ্রাম</option>
+<option>বন্ধুদের সঙ্গে কথা</option>
+<option>পারিবারিক কাজ</option>
+<option>নামাজ / ধর্মীয় কাজ</option>
+<option>বাইরে যাওয়া</option>
+<option>অসুস্থতা / ক্লান্তি</option>
+<option>অন্যান্য</option>
+</select>
+<label>কেন পড়া হয়নি?</label>
+<select id="reason">
+<option>ইচ্ছা হয়নি</option>
+<option>ঘুম পেয়েছে</option>
+<option>মোবাইলে সময় গেছে</option>
+<option>কাজ ছিল</option>
+<option>বিষয় বুঝতে সমস্যা</option>
+<option>শরীর ভালো ছিল না</option>
+<option>সময় পরিকল্পনা ঠিক ছিল না</option>
+<option>অন্যান্য</option>
+</select>
+<label>বিস্তারিত লিখো</label>
+<textarea id="otherDetail" placeholder="যেমন: সকাল ৮টা থেকে ৯টা পর্যন্ত ওয়েবসাইটের কাজ করেছি।"></textarea>
+<button onclick="addOther()">সময় ব্যবহারের হিসাব সংরক্ষণ</button>
+</div>
+<div class="card">
+<h2>🧾 আজ পড়া ছাড়া অন্য কাজে সময়</h2>
+<div id="otherLogs"></div>
+</div>
+</section>
+
+<!-- REPORT -->
+<section id="report" class="section">
+<div class="card">
+<h2>📈 পড়াশোনার রিপোর্ট</h2>
+<label>যে দিনের হিসাব দেখতে চাও</label>
+<input type="date" id="reportDate">
+<button onclick="renderReport()">রিপোর্ট দেখাও</button>
+<div id="reportContent"></div>
+</div>
+<div class="card">
+<h2>📅 গত ৭ দিনের হিসাব</h2>
+<div id="weekly"></div>
+</div>
+<div class="card">
+<h2>📦 ডেটা ব্যাকআপ</h2>
+<p class="muted">ব্রাউজারের ডেটা মুছে গেলে হিসাব হারাতে পারো। তাই নিয়মিত ব্যাকআপ রাখবে।</p>
+<div class="row">
+<button onclick="backup()">ডেটা ডাউনলোড</button>
+<button class="secondary" onclick="document.getElementById('restoreFile').click()">ডেটা ফিরিয়ে আনো</button>
+<input type="file" id="restoreFile" accept=".json" hidden onchange="restore(event)">
+</div>
+<button class="danger" onclick="clearAll()">সব হিসাব মুছে ফেলো</button>
+</div>
+</section>
+
+<!-- MOTIVATION -->
+<section id="motivation" class="section">
+<div class="quote">
+<h2>🎯 নিজের কাছে নিজের অঙ্গীকার</h2>
+<p>ক্যাডেট কলেজের শিক্ষার্থীরা ভালো পড়াশোনা করছে। তারা তাদের লক্ষ্যের দিকে এগিয়ে যাচ্ছে। আমিও আমার সামর্থ্য অনুযায়ী এগিয়ে যাব।</p>
+<p>অন্যের ভালো ফল আমার ব্যর্থতার প্রমাণ নয়।</p>
+<p><b>আমি আজ পড়ব, কারণ আমার ভবিষ্যৎ আমার আজকের কাজের ওপর নির্ভর করছে।</b></p>
+<p>একদিন কম পড়লে আমি হাল ছাড়ব না। পরের দিন আবার শুরু করব।</p>
+</div>
+<div class="card">
+<h2>💡 প্রতিদিনের মনে রাখার কথা</h2>
+<p>১. স্বপ্ন দেখলেই হবে না, স্বপ্নের জন্য কাজ করতে হবে।</p>
+<p>২. বই খুলে বসা হলো প্রথম বিজয়।</p>
+<p>৩. কঠিন বিষয় এড়িয়ে গেলে দুর্বলতা বাড়বে।</p>
+<p>৪. কোডিং অপেক্ষা করতে পারে, পরীক্ষার প্রস্তুতির সময় সীমিত।</p>
+<p>৫. বিশ্রামও প্রস্তুতির অংশ। ঘুম বাদ দিয়ে পড়াশোনা নয়।</p>
+<p>৬. অন্যের সঙ্গে নয়, নিজের আগের দিনের সঙ্গে তুলনা করো।</p>
+</div>
+<div class="card">
+<h2>🤲 আমার দোয়া</h2>
+<p>رَبِّ زِدْنِي عِلْمًا</p>
+<p>অর্থ: হে আমার রব! আমার জ্ঞান বৃদ্ধি করে দিন।</p>
+</div>
+</section>
+
+<footer>
+<strong>DAKHIL 2027 STUDY COMMAND CENTER</strong><br>
+Created for Salman Farshi<br>
+salmanfarshi1630.github.io
+</footer>
+</main>
+
+<script>
+const defaults=[
+"কুরআন মাজিদ","হাদিস শরিফ","আকাইদ ও ফিকহ","আরবি ১ম পত্র",
+"আরবি ২য় পত্র","বাংলা ১ম পত্র","বাংলা ২য় পত্র",
+"ইংরেজি ১ম পত্র","ইংরেজি ২য় পত্র","গণিত",
+"তথ্য ও যোগাযোগ প্রযুক্তি","বিজ্ঞান","বাংলাদেশ ও বিশ্বপরিচয়",
+"ঐচ্ছিক / অন্যান্য"
+];
+const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+let subjects=get("subjects",defaults);
+let studies=get("studies",[]);
+let others=get("others",[]);
+let settings=get("settings",{goal:6});
+const today=()=>new Date().toLocaleDateString("en-CA");
+const $=id=>document.getElementById(id);
+function save(k,v){localStorage.setItem(k,JSON.stringify(v))}
+function mins(a,b){
+ if(!a||!b)return 0;
+ let [h,m]=a.split(":").map(Number),[x,y]=b.split(":").map(Number);
+ let n=x*60+y-(h*60+m);
+ return n<0?n+1440:n;
+}
+function hours(n){
+ let h=Math.floor(n/60),m=n%60;
+ return h+" ঘণ্টা "+(m?m+" মিনিট":"");
+}
+function tab(id){
+ document.querySelectorAll(".section").forEach(x=>x.classList.remove("active"));
+ $(id).classList.add("active");
+ if(id==="report")renderReport();
+}
+function saveSettings(){
+ settings.goal=Math.max(1,Number($("goal").value)||6);
+ save("settings",settings);refresh();
+ alert("সেটিংস সংরক্ষিত হয়েছে");
+}
+function renderSubjects(){
+ $("subjects").innerHTML=subjects.map((s,i)=>`
+ <div class="subject">
+ <input data-sub="${i}" value="${esc(s)}" aria-label="বিষয়ের নাম ${i+1}">
+ <span>বিষয় ${i+1}</span></div>`).join("");
+ $("studySubject").innerHTML=subjects.map(s=>`<option>${esc(s)}</option>`).join("");
+}
+function saveSubjects(){
+ subjects=[...document.querySelectorAll("[data-sub]")].map(x=>x.value.trim()||"নামহীন বিষয়");
+ save("subjects",subjects);renderSubjects();alert("১৪টি বিষয়ের নাম সংরক্ষিত হয়েছে");
+}
+function esc(s){
+ return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function addStudy(){
+ let d=$("studyDate").value,a=$("studyStart").value,b=$("studyEnd").value;
+ let n=mins(a,b);
+ if(!d||!a||!b||!n){alert("তারিখ, শুরু ও শেষের সময় ঠিকভাবে দাও");return}
+ studies.push({id:Date.now(),date:d,subject:$("studySubject").value,start:a,end:b,minutes:n,detail:$("studyDetail").value,understood:$("understood").value});
+ save("studies",studies);
+ $("studyDetail").value="";refresh();
+}
+function addOther(){
+ let d=$("otherDate").value,a=$("otherStart").value,b=$("otherEnd").value;
+ let n=mins(a,b);
+ if(!d||!a||!b||!n){alert("তারিখ, শুরু ও শেষের সময় ঠিকভাবে দাও");return}
+ others.push({id:Date.now(),date:d,start:a,end:b,minutes:n,activity:$("activity").value,reason:$("reason").value,detail:$("otherDetail").value});
+ save("others",others);$("otherDetail").value="";refresh();
+}
+function del(type,id){
+ if(!confirm("এই হিসাবটি মুছে ফেলবে?"))return;
+ if(type==="s"){studies=studies.filter(x=>x.id!==id);save("studies",studies)}
+ else{others=others.filter(x=>x.id!==id);save("others",others)}
+ refresh();
+}
+function listLogs(type,date){
+ let arr=type==="s"?studies:others;
+ let data=arr.filter(x=>x.date===date).sort((a,b)=>a.start.localeCompare(b.start));
+ if(!data.length)return '<p class="muted">এখনো কোনো হিসাব যোগ করা হয়নি।</p>';
+ return data.map(x=>`<div class="log">
+ <strong>${type==="s"?esc(x.subject):esc(x.activity)} — ${hours(x.minutes)}</strong>
+ ${esc(x.start)} – ${esc(x.end)}<br>
+ ${type==="s"?esc(x.detail)+"<br>"+esc(x.understood):"কারণ: "+esc(x.reason)+"<br>"+esc(x.detail)}
+ <br><button class="danger" style="padding:5px 9px;margin-top:6px" onclick="del('${type}',${x.id})">মুছুন</button>
+ </div>`).join("");
+}
+function totals(date){
+ let s=studies.filter(x=>x.date===date).reduce((a,x)=>a+x.minutes,0);
+ let o=others.filter(x=>x.date===date).reduce((a,x)=>a+x.minutes,0);
+ return {s,o};
+}
+function refresh(){
+ let d=$("date").value||today(),t=totals(d),g=settings.goal*60;
+ $("studyTotal").textContent=hours(t.s);
+ $("otherTotal").textContent=hours(t.o);
+ $("goalShow").textContent=settings.goal+" ঘণ্টা";
+ let p=Math.min(100,Math.round(t.s/g*100));
+ $("percent").textContent=p+"%";
+ $("progress").style.width=p+"%";
+ $("progressText").textContent=t.s>=g?"অভিনন্দন! আজকের লক্ষ্য পূরণ হয়েছে।":`আর ${hours(g-t.s)} পড়লে আজকের লক্ষ্য পূরণ হবে।`;
+ $("studyLogs").innerHTML=listLogs("s",d);
+ $("otherLogs").innerHTML=listLogs("o",d);
+ renderReport();
+}
+function renderReport(){
+ let d=$("reportDate").value||today(),t=totals(d);
+ let g=settings.goal*60;
+ let subjectsHtml=subjects.map(s=>{
+ let n=studies.filter(x=>x.date===d&&x.subject===s).reduce((a,x)=>a+x.minutes,0);
+ return `<tr><td>${esc(s)}</td><td>${hours(n)}</td></tr>`;
+ }).join("");
+ $("reportContent").innerHTML=`
+ <h3>${d} — দৈনিক রিপোর্ট</h3>
+ <p>📚 পড়াশোনা: <b>${hours(t.s)}</b></p>
+ <p>⏰ অন্য কাজে: <b>${hours(t.o)}</b></p>
+ <p>🎯 লক্ষ্য পূরণ: <b>${Math.min(100,Math.round(t.s/g*100))}%</b></p>
+ <h3>বিষয়ভিত্তিক হিসাব</h3>
+ <table><tr><th>বিষয়</th><th>সময়</th></tr>${subjectsHtml}</table>
+ <p class="muted">নোট: অন্য কাজে সময় দেওয়া মানেই সব সময় অপচয় নয়। বিশ্রাম, নামাজ ও প্রয়োজনীয় কাজও জীবনের অংশ।</p>`;
+ let html="";
+ for(let i=6;i>=0;i--){
+ let day=new Date();day.setDate(day.getDate()-i);
+ let key=day.toLocaleDateString("en-CA"),v=totals(key);
+ html+=`<tr><td>${key}</td><td>${hours(v.s)}</td><td>${hours(v.o)}</td></tr>`;
+ }
+ $("weekly").innerHTML=`<table><tr><th>তারিখ</th><th>পড়াশোনা</th><th>অন্য কাজ</th></tr>${html}</table>`;
+}
+function backup(){
+ let data={subjects,studies,others,settings};
+ let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ let a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download="Salman-Study-Backup.json";a.click();
+ URL.revokeObjectURL(a.href);
+}
+function restore(e){
+ let file=e.target.files[0];if(!file)return;
+ let r=new FileReader();
+ r.onload=()=>{
+ try{
+ let x=JSON.parse(r.result);
+ if(!Array.isArray(x.subjects)||!Array.isArray(x.studies)||!Array.isArray(x.others))throw Error();
+ subjects=x.subjects;studies=x.studies;others=x.others;settings=x.settings||{goal:6};
+ save("subjects",subjects);save("studies",studies);save("others",others);save("settings",settings);
+ renderSubjects();$("goal").value=settings.goal;refresh();alert("ব্যাকআপ ফিরিয়ে আনা হয়েছে");
+ }catch{alert("সঠিক ব্যাকআপ ফাইল নয়")}
+ };
+ r.readAsText(file);
+}
+function clearAll(){
+ if(!confirm("সতর্কতা: সব পড়ার হিসাব ও বিষয় মুছে যাবে। নিশ্চিত?"))return;
+ if(!confirm("শেষবার নিশ্চিত হও। আগে ব্যাকআপ নিয়েছ?"))return;
+ studies=[];others=[];
+ save("studies",studies);save("others",others);refresh();
+}
+$("date").value=today();
+$("studyDate").value=today();
+$("otherDate").value=today();
+$("reportDate").value=today();
+$("goal").value=settings.goal;
+$("date").addEventListener("change",refresh);
+$("reportDate").addEventListener("change",renderReport);
+renderSubjects();refresh();
+</script>
+</body>
+</html>
